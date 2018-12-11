@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Bootstrap 4 Admin Panel">
+    <meta name="author" content="Alex">
+    <link rel="icon" href="/images/favicon.ico">
+    <title>Bootstrap 4 Admin Panel</title>
+    <link href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Alex Soft</a>
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <a class="nav-link" href="/signout">Sign out</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/adminpanel">
+                            <span data-feather="user"></span>
+                            Admin
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/userpanel.html">
+                            <span data-feather="users"></span>
+                            User
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <h2>Current user profile</h2>
+            <p class="lead user-id">User ID: </p>
+            <p class="lead user-username">Username: </p>
+            <p class="lead user-firstname">First Name: </p>
+            <p class="lead user-lastname">Last Name: </p>
+            <p class="lead user-email">Email: </p>
+            <p class="lead user-roles">Roles: </p>
+        </main>
+    </div>
+</div>
+<script src="/webjars/jquery/3.3.1-1/jquery.min.js"></script>
+<script src="/webjars/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script src="/js/ajaxscripts.js"></script>
+<script>
+    var API_URL = 'http://' + location.host + '/users/logged'
+    $(document).ready(getuserdata(API_URL));
+</script>
+<script>
+    feather.replace()
+</script>
+</body>
+</html>
