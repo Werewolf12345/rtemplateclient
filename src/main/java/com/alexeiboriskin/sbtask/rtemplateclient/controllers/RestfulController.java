@@ -1,12 +1,16 @@
 package com.alexeiboriskin.sbtask.rtemplateclient.controllers;
 
+import com.alexeiboriskin.sbtask.rtemplateclient.models.Role;
 import com.alexeiboriskin.sbtask.rtemplateclient.models.User;
 import com.alexeiboriskin.sbtask.rtemplateclient.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -45,7 +49,20 @@ public class RestfulController {
     }
 
     @GetMapping(value = "/logged", produces = "application/json")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        return userService.findByUserName(userDetails.getUsername());
+    public User user(@AuthenticationPrincipal UserDetails userDetails,
+                     OAuth2AuthenticationToken authentication) {
+        if(userDetails == null) {
+            Map<String, Object> principalDataMap = authentication.getPrincipal().getAttributes();
+            return new User((String) principalDataMap.get("name"),
+                            (String) principalDataMap.get("given_name"),
+                            (String) principalDataMap.get("family_name"),
+                            (String) principalDataMap.get("email"),
+                            (String) principalDataMap.get("sub"),
+                            authentication.getAuthorities().stream()
+                                           .map(a -> new Role(a.getAuthority()))
+                                           .collect(Collectors.toSet()));
+        } else {
+            return userService.findByUserName(userDetails.getUsername());
+        }
     }
 }
