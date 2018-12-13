@@ -26,7 +26,16 @@ public class UserServiceRestTemplateImpl implements UserService {
 
     @Override
     public User saveUser(User user) {
-        return restTemplate.postForObject(URL, user, User.class);
+        User userInDb = findByUserName(user.getUsername());
+
+        if (userInDb != null) {
+            user.setId(userInDb.getId());
+            restTemplate.put(URL + "{id}", user, user.getId());
+            return restTemplate.getForObject(URL + "{id}", User.class,
+                    user.getId());
+        } else {
+            return restTemplate.postForObject(URL, user, User.class);
+        }
     }
 
     @Override
