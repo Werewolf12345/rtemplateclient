@@ -1,10 +1,24 @@
 package com.alexeiboriskin.sbtask.rtemplateclient.services;
 
 import com.alexeiboriskin.sbtask.rtemplateclient.models.User;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -14,14 +28,32 @@ public class UserServiceRestTemplateImpl implements UserService {
 
     private static final String USER = "admin";
     private static final String PASSWORD = "admin";
-    private static final String URL = "http://localhost:8081/users/";
+    private static final String URL = "https://localhost:8081/users/";
 
     private final RestTemplate restTemplate;
 
-    public UserServiceRestTemplateImpl(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder
-                .basicAuthentication(USER, PASSWORD)
+    public UserServiceRestTemplateImpl(@Value("${trust.store}") Resource trustStore,
+                                       @Value("${trust.store.password}") String trustStorePassword) {
+        SSLContext sslContext = null;
+        try {
+            sslContext = new SSLContextBuilder()
+                    .loadTrustMaterial(trustStore.getURL(), trustStorePassword.toCharArray())
+                    .build();
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException | CertificateException | IOException e) {
+            e.printStackTrace();
+        }
+        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+        HttpClient httpClient = HttpClients.custom()
+                .setSSLSocketFactory(socketFactory)
                 .build();
+        HttpComponentsClientHttpRequestFactory factory =
+                new HttpComponentsClientHttpRequestFactory(httpClient);
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+        restTemplate.getInterceptors().add(
+                new BasicAuthenticationInterceptor(USER, PASSWORD));
+
+        this.restTemplate = restTemplate;
     }
 
     @Override
